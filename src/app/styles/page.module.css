@@ -1,0 +1,11 @@
+.page{
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 50px;
+    background-color: rgb(64, 34, 80);
+    min-height: 100vh;
+}
+
