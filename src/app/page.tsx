@@ -11,7 +11,8 @@ export default function Home() {
     return (
       <div className={styles.page}>
         <h1>Bem-Vindo a Página Principal :)</h1>
-        
+        <br/>
+        <button onClick={() => route.push('/paginaLogin')}>Pagina Login</button>
       </div>
     );
   }
