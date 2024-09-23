@@ -1,20 +1,18 @@
 'use client';
-import { use, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import styles from "./styles/login.module.css"; // ajuste o caminho conforme necessário
+import styles from "./styles/page.module.css"; // ajuste o caminho conforme necessário
 
-export default function Login() {
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
-  const [erro, setErro] = useState("");
+export default function Home() {
+  const [user, setUser] = useState(true);
   const route = useRouter();
 
-  
+  if (user) {
     return (
       <div className={styles.page}>
-        <h1>Bem-Vindo </h1>
+        <h1>Bem-Vindo a Página Principal :)</h1>
         
       </div>
     );
   }
-
+}
