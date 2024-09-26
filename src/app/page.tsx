@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./styles/page.module.css"; // ajuste o caminho conforme necessário
+import Botao from "./components/botao";
 
 export default function Home() {
   const [user, setUser] = useState(true);
@@ -12,7 +13,7 @@ export default function Home() {
       <div className={styles.page}>
         <h1>Bem-Vindo a Página Principal :)</h1>
         <br/>
-        <button onClick={() => route.push('/paginaLogin')}>Pagina Login</button>
+        <Botao titulo="Ir para Pagina Login" botao={() => route.push('/paginaLogin')}/>
       </div>
     );
   }
