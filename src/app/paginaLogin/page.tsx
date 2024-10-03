@@ -1,7 +1,7 @@
 'use client';
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
-import styles from "../styles/login.module.css"; // ajuste o caminho conforme necessário
+import styles from "../styles/login.module.css"; 
 import { error } from "console";
 
 export default function Login() {
