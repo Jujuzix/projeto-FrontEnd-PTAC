@@ -37,6 +37,6 @@ export default function Login() {
               <button type="submit" className={styles.botao}>Efetuar Login</button>
           </form>
       </div>
-    );
+    ); 
   }
 
