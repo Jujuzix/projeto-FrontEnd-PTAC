@@ -2,21 +2,22 @@
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/login.module.css"; 
+import Botao from "../components/Botao";
 import { error } from "console";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
+  const [user, setUser] = useState(true);
   const router = useRouter();
 
-  //Manipulador de Eventos para formulario de login dentro de uma aplicação.
+  
   const handleLogin = (event:React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();//preve o cancelamento de algum evento.
+    event.preventDefault();
     if(email === 'email111@gmail.example.com' && senha ==='senha123'){
-        router.push('/') // verificação das credenciais para entrar dentro da pagina principal.
     } else{
-        setErro ("Email ou Senha Inválidos.") //se a verificação tiver erro, retornará esta mensagem. 
+        setErro ("Email ou Senha Inválido ") 
     }
   }
 
@@ -34,7 +35,8 @@ export default function Login() {
               <input className={styles.input} type="password" id="senha" value={senha} onChange={(e) => setSenha(e.target.value)} required />
             </div>
             {erro && <p className={styles.msgErro}>{erro}</p>}
-              <button type="submit" className={styles.botao}>Efetuar Login</button>
+            <Botao titulo="Efetuar Login" botao={() => router.push('/')}/>
+            <Botao titulo="Ir para Pagina de Cadastro" botao={() => router.push('/paginaCadastro')}/>
           </form>
       </div>
     ); 
