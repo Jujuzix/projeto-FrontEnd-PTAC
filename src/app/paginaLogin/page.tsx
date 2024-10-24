@@ -33,7 +33,7 @@ export default function Login() {
 
       const user = usuarioConvertido.find((user) => user.email === email && user.password === senha);
       if (user) {
-        localStorage.setItem('usuario', JSON.stringify(user)); // Store user info in localStorage
+        localStorage.setItem('usuario', JSON.stringify(user)); 
         router.push("/");
       } else {
         setErro("Usuário não encontrado.");
