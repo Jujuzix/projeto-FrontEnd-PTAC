@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/login.module.css"; 
 import Botao from "../components/Botao";
+import Usuario from "../interfaces/usuario";
 
 export default function Cadastro() {
   const [nome, setNome] = useState<string>("");
