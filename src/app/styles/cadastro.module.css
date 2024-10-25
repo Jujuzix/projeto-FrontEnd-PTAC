@@ -1,4 +1,5 @@
-.paginaLogin {
+
+.paginaCadastro {
     color: black;
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
@@ -23,12 +24,8 @@
     text-align: center;
 }
 
-.email, .senha {
+.nome, .email, .senha {
     margin-bottom: 15px;
-}
-
-.label {
-    font-weight: bold;
 }
 
 .input {
@@ -57,9 +54,9 @@
 
 .botao {
     margin-top: 10px;
-    color: #007bff; 
-    background: none; 
-    border: none; 
-    text-decoration: underline; 
-    cursor: pointer; 
+    color: #007bff;
+    background: none;
+    border: none;
+    text-decoration: underline;
+    cursor: pointer;
 }

@@ -11,9 +11,8 @@ export default function Home() {
   if (user) {
     return (
       <div className={styles.page}>
-        <h1>Bem-Vindo a Página Principal :)</h1>
-        <br/>
-        <Botao titulo="Ir para Pagina Login" botao={() => route.push('/paginaLogin')}/>
+        <h1 className={styles.titulo}>Bem-Vindo à Página Principal :)</h1>
+        <Botao titulo="Ir para Página de Login" botao={() => route.push('/paginaLogin')}/>
       </div>
     );
   }
