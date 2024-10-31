@@ -75,8 +75,8 @@ export default function Login() {
 
         {erro && <p className={styles.msgErro}>{erro}</p>}
         <button type="submit" className={styles.botaoSubmit}>Efetuar Login</button>
-        <Botao titulo="Ir para Página de Cadastro" botao={() => router.push('/paginaCadastro')} />
-      </form>
+       <Botao titulo="Ir para Página de Cadastro" botao={() => router.push('/paginaCadastro')} />
+      </form> 
     </div>
   );
 }

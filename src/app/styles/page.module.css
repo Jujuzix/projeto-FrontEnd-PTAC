@@ -19,10 +19,12 @@
 
 
 .botao {
+    display: inline-block;
     color: #007bff;
     background: none;
     border: none;
-    text-decoration: underline;
+    text-decoration: none;
     cursor: pointer;
     margin-top: 10px;
 }
+

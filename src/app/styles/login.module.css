@@ -1,3 +1,5 @@
+
+
 .paginaLogin {
     color: black;
     font-family: Arial, sans-serif;
@@ -6,7 +8,10 @@
     justify-content: center;
     align-items: center;
     height: 100vh;
+    padding: 0;
     margin: 0;
+    box-sizing: border-box;
+    
 }
 
 .form {
