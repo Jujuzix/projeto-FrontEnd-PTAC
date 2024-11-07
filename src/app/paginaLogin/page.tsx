@@ -1,14 +1,18 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/login.module.css";
 import Usuario from "../interfaces/usuario";
+import { setCookie, parseCookies } from 'nookies';
 import Botao from "../components/Botao";
+import { ApiURL } from "../config";
+
+
 
 export default function Login() {
   const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
+  const [password, setPassword] = useState("");
   const [erro, setErro] = useState("");
   const router = useRouter();
 
@@ -17,6 +21,13 @@ export default function Login() {
     if (usuarioLogado) {
       console.log(usuarioLogado);
       router.push('/');
+    }
+  }, [router]);
+
+  useEffect(()=> {
+    const {'restaurant-token' : token} = parseCookies()
+    if (token){
+      router.push('/')
     }
   }, [router]);
 
@@ -32,7 +43,7 @@ export default function Login() {
       const usuarios = await response.json();
       const usuarioConvertido: Usuario[] = usuarios as Usuario[];
 
-      const user = usuarioConvertido.find((user) => user.email === email && user.password === senha);
+      const user = usuarioConvertido.find((user) => user.email === email && user.password === password);
       if (user) {
         localStorage.setItem('usuario', JSON.stringify(user)); 
         router.push("/");
@@ -44,6 +55,40 @@ export default function Login() {
       console.error(error);
     }
   };
+
+  const  handleSubmit = async (e :FormEvent) => {
+    e.preventDefault();
+    try {
+
+      const response = await fetch(`${ApiURL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type' : 'application/json'
+        },
+        body : JSON.stringify({email, password})
+      })
+  
+      if (response){
+        const data = await response.json();
+        const {erro, mensagem, token} = data
+        console.log(data)
+        if (erro){
+         setErro(mensagem)
+        } else {
+          setCookie(undefined, 'restaurant-token', token, {
+            maxAge: 60*60*1 //1 hora
+          })
+          router.push('/')
+        }
+      }
+    } catch (error) {
+      console.error('Erro na requisicao', error)
+    }
+
+    console.log('Email:', email);
+    console.log('Senha:', password);
+  };
+  
 
   return (
     <div className={styles.paginaLogin}>
@@ -67,8 +112,8 @@ export default function Login() {
             className={styles.input}
             type="password"
             id="senha"
-            value={senha}
-            onChange={(e) => setSenha(e.target.value)}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
           />
         </div>
