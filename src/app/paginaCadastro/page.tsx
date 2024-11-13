@@ -1,10 +1,19 @@
 'use client';
 
-import { useState } from "react";
+
+import { FormEvent, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/cadastro.module.css";
 import Botao from "../components/Botao";
 import Usuario from "../interfaces/usuario";
+import { ApiURL } from '../../../config';
+import { setCookie, parseCookies } from 'nookies';
+
+interface ResponseSignin {
+  erro: boolean,
+  mensagem: string,
+  token?: string
+}
 
 export default function Cadastro() {
   const [usuario, setUsuario] = useState<Usuario>({
@@ -12,7 +21,7 @@ export default function Cadastro() {
     email: '',
     password: '',
   });
-  const [erro, setErro] = useState("");
+  const [erro, setError] = useState("");
   const router = useRouter();
 
   const alterarNome = (novoNome: string) => {
@@ -36,11 +45,53 @@ export default function Cadastro() {
     }));
   };
 
+
+  useEffect(() => {
+    const { 'restaurant-token': token } = parseCookies();
+    if (token) {
+      router.push('/');
+    }
+  }, [router]);
+
+  const  handleSubmit = async (e : FormEvent) => {
+    e.preventDefault();
+    try {
+     const response = await fetch(`${ApiURL}/auth/cadastro`, {
+      method: 'POST',
+      headers: {
+        'Content-Type' : 'application/json'
+      },
+      body: JSON.stringify({nome: usuario.nome,email: usuario.email, password: usuario.password})
+     })
+      if (response){
+        const data : ResponseSignin = await response.json()
+        const {erro, mensagem, token = ''} = data;
+        console.log(data)
+        if (erro){
+          setError(mensagem)
+        } else {
+          // npm i nookies setCookie
+          setCookie(undefined, 'restaurant-token', token, {
+            maxAge: 60*60*1 // 1 hora
+          } )
+
+          router.push('/')
+
+        }
+      } else {
+
+      }
+  } 
+    catch (error) {
+    console.error('Erro na requisicao', error)
+  }
+}
+
   return (
     <div className={styles.paginaCadastro}>
-      <form className={styles.form}>
+      <form className={styles.form} onSubmit={handleSubmit}>
         <div className={styles.nome}>
-        <h1 className={styles.titulo}>Faça seu Cadastro</h1>
+          <h1 className={styles.titulo}>Faça seu Cadastro</h1>
           <label htmlFor="nome">Insira seu Nome:</label>
           <input
             className={styles.input}

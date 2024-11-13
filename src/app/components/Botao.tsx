@@ -14,4 +14,3 @@ const Botao: React.FC<BotaoProp> = ({titulo, botao}) => {
 }
 
 export default Botao;
-// inultio isso
