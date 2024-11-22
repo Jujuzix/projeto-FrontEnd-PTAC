@@ -1,110 +1,99 @@
 'use client';
 
-
-import { FormEvent, useState, useEffect } from "react";
+import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/cadastro.module.css";
 import Botao from "../components/Botao";
-import Usuario from "../interfaces/usuario";
+import Reserva from "../interfaces/reserva";
 import { ApiURL } from '../../../config';
-import { setCookie, parseCookies } from 'nookies';
 
 interface ResponseSignin {
-  erro: boolean,
-  mensagem: string,
-  token?: string
+  erro: boolean;
+  mensagem: string;
+  token?: string;
 }
 
-export default function Cadastro() {
-    const alterarquantPessoas = (value: string) => {
-        let newValue = parseInt(value, 10);  
-      
-    
-        if (newValue > 50) {
-          alert("A quantidade de pessoas não pode ser superior a 50!");  
-          newValue = 50; 
-        }
-      
-        
-        setUsuario({
-          ...usuario,
-          quantPessoas: newValue,
-        });
-      };
-      
-
-
-
-  const [usuario, setUsuario] = useState<Usuario>({
-    nome: '',
-    data: '',
-    quantPessoas: '',
+export default function ReservaPage() {
+  const [reserva, setReserva] = useState<Reserva>({
+    nome_reserva: "",
+    n_mesa: 0,
+    data_reserva: "",
+    n_pessoas: 0
   });
-  const [erro, setError] = useState("");
+
+  const [erro, setError] = useState<string>("");
   const router = useRouter();
 
   const alterarNome = (novoNome: string) => {
-    setUsuario((valoresAnteriores) => ({
+    setReserva((valoresAnteriores) => ({
       ...valoresAnteriores,
-      nome: novoNome
+      nome_reserva: novoNome
     }));
   };
 
-  const alterarData = (novaData: date) => {
-    setUsuario((valoresAnteriores) => ({
+  const alterarNmesa = (novoNmesa: string) => {
+    const newNmesa = parseInt(novoNmesa, 10);
+    if (!isNaN(newNmesa)) {
+      setReserva((valoresAnteriores) => ({
+        ...valoresAnteriores,
+        n_mesa: newNmesa
+      }));
+    }
+  };
+
+  const alterarData = (novaData: string) => {
+    setReserva((valoresAnteriores) => ({
       ...valoresAnteriores,
-      data: novaData
+      data_reserva: novaData
     }));
   };
 
   const alterarPessoas = (novaquantPessoas: string) => {
-    setUsuario((valoresAnteriores) => ({
-      ...valoresAnteriores,
-      quantPessoas: novaquantPessoas
-    }));
+    const newValue = parseInt(novaquantPessoas, 10);
+    if (!isNaN(newValue) && newValue >= 1 && newValue <= 50) {
+      setReserva((valoresAnteriores) => ({
+        ...valoresAnteriores,
+        n_pessoas: newValue
+      }));
+    } else {
+      setError("A quantidade de pessoas deve ser entre 1 e 50!");
+    }
   };
 
-
-  useEffect(() => {
-    const { 'restaurant-token': token } = parseCookies();
-    if (token) {
-      router.push('/');
-    }
-  }, [router]);
-
-  const  handleSubmit = async (e : FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
-     const response = await fetch(`${ApiURL}/auth/cadastro`, {
-      method: 'POST',
-      headers: {
-        'Content-Type' : 'application/json'
-      },
-      body: JSON.stringify({nome: usuario.nome,data: usuario.data, quantPessoas: usuario.quantPessoas})
-     })
-      if (response){
-        const data : ResponseSignin = await response.json()
-        const {erro, mensagem, token = ''} = data;
-        console.log(data)
-        if (erro){
-          setError(mensagem)
+      const response = await fetch(`${ApiURL}/mesa/reservar`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          nome: reserva.nome_reserva,
+          n_mesa: reserva.n_mesa,
+          data: reserva.data_reserva,
+          n_pessoas: reserva.n_pessoas
+        })
+      });
+
+      if (response.ok) {
+        const data: ResponseSignin = await response.json();
+        const { erro, mensagem, token = '' } = data;
+
+        if (erro) {
+          setError(mensagem);
         } else {
-          // npm i nookies setCookie
-          setCookie(undefined, 'restaurant-token', token, {
-            maxAge: 60*60*1 // 1 hora
-          } )
-
-          router.push('/')
-
+          // setCookie(undefined, 'restaurant-token', token, { maxAge: 60 * 60 * 1 });
+          router.push('/');
         }
       } else {
-
+        setError("Erro ao tentar cadastrar. Tente novamente.");
       }
-  } 
-    catch (error) {
-    console.error('Erro na requisicao', error)
-  }
-}
+    } catch (error) {
+      console.error('Erro na requisição', error);
+      setError("Erro de rede ou servidor. Tente novamente.");
+    }
+  };
 
   return (
     <div className={styles.paginaCadastro}>
@@ -116,8 +105,20 @@ export default function Cadastro() {
             className={styles.input}
             type="text"
             id="nome"
-            value={usuario.nome}
+            value={reserva.nome_reserva}
             onChange={(e) => alterarNome(e.target.value)}
+            required
+          />
+        </div>
+
+        <div className={styles.email}>
+          <label htmlFor="n_mesa">Insira o número para utilização da mesa:</label>
+          <input
+            className={styles.input}
+            type="number"
+            id="n_mesa"
+            value={reserva.n_mesa}
+            onChange={(e) => alterarNmesa(e.target.value)}
             required
           />
         </div>
@@ -128,22 +129,22 @@ export default function Cadastro() {
             className={styles.input}
             type="date"
             id="data"
-            value={usuario.data}
+            value={reserva.data_reserva}
             onChange={(e) => alterarData(e.target.value)}
             required
           />
         </div>
 
         <div className={styles.senha}>
-          <label htmlFor="quantPessoas">Insira a Quantidade de Pessoas que irá ocupar a mesa:</label>
+          <label htmlFor="n_pessoas">Insira a Quantidade de Pessoas que irão ocupar a mesa:</label>
           <input
             className={styles.input}
             type="number"
-            id="quantPessoas"
+            id="n_pessoas"
             min="1"
             max="50"
-            value={usuario.quantPessoas}
-            onChange={(e) => alterarquantPessoas(e.target.value)}
+            value={reserva.n_pessoas}
+            onChange={(e) => alterarPessoas(e.target.value)}
             required
           />
         </div>
