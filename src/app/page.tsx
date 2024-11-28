@@ -18,7 +18,8 @@ export default function Home() {
         <div className={styles.botoesContainer}>
           <Botao titulo="Ir para Página de Login" botao={() => route.push('/paginaLogin')} />
           <Botao titulo="Faça o seu Cadastro" botao={() => route.push('/paginaCadastro')} />
-          <Botao titulo="Faça reserva de sua Mesa" botao={() => route.push('/paginacadMesas')} />
+          <Botao titulo="Faça reserva de sua Mesa" botao={() => route.push('/cadastroReservas')} />
+          <Botao titulo="Cadastro Mesa" botao={() => route.push('/cadastroMesas')} />
         </div>
       </div>
     );

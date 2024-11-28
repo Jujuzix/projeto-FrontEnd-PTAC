@@ -1,8 +1,8 @@
-interface Mesa{
-    id: number, 
-    codigo_mesa: string,
-    num_lugares: number
-}
-
-
-export default Mesa;
+interface Mesa {
+    id: number;         
+    n_mesa: number;     
+    n_lugares: number;  
+  }
+  
+  export default Mesa;
+  
