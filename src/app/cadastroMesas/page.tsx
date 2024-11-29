@@ -56,6 +56,7 @@ export default function MesaPage() {
         body: JSON.stringify({
           n_mesa: mesa.n_mesa,
           n_pessoas: mesa.n_pessoas, 
+          tipo: mesa.tipo
         }),
       });
 
