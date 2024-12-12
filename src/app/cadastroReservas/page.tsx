@@ -13,7 +13,7 @@ interface ResponseSignin {
   token?: string;
 }
 
-interface Mesa {
+interface MesasType {
   id: number;
   n_mesa: number;
   n_pessoas: number;
@@ -21,6 +21,16 @@ interface Mesa {
 }
 
 export default function ReservaPage() {
+  const [mesa, setMesas] = useState<MesasType[]>([])
+
+  useEffect(() => {
+    async function fecthData() {
+      const response = await fetch("http://localhost:3333/reservas")
+      console.log(await response.json())
+    }
+    fecthData()
+  }, [])
+
   const [reserva, setReserva] = useState<Reserva>({
     n_mesa: 0,
     data_reserva: "",
@@ -126,7 +136,7 @@ export default function ReservaPage() {
       <form className={styles.form} onSubmit={handleSubmit}>
         <div className={styles.email}>
           <h1 className={styles.titulo}>Faça a Sua Reserva de Mesa:</h1>
-          
+
           <label htmlFor="n_mesa">Selecione o número da mesa:</label>
           <select
             className={styles.input}
