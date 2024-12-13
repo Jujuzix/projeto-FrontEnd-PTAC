@@ -6,6 +6,7 @@ import styles from "../styles/cadastro.module.css";
 import Botao from "../components/Botao";
 import Reserva from "../interfaces/reserva";
 import { ApiURL } from '../../../config';
+import { setCookie, parseCookies } from 'nookies';
 
 interface ResponseSignin {
   erro: boolean;
@@ -13,7 +14,7 @@ interface ResponseSignin {
   token?: string;
 }
 
-interface MesasType {
+interface Mesa {
   id: number;
   n_mesa: number;
   n_pessoas: number;
@@ -21,16 +22,6 @@ interface MesasType {
 }
 
 export default function ReservaPage() {
-  const [mesa, setMesas] = useState<MesasType[]>([])
-
-  useEffect(() => {
-    async function fecthData() {
-      const response = await fetch("http://localhost:3333/reservas")
-      console.log(await response.json())
-    }
-    fecthData()
-  }, [])
-
   const [reserva, setReserva] = useState<Reserva>({
     n_mesa: 0,
     data_reserva: "",
@@ -49,6 +40,7 @@ export default function ReservaPage() {
       if (response) {
         const data = await response.json();
         setMesas(data.mesas); // Certifique-se que 'mesas' é a chave correta na resposta
+        console.log(data)
       } else {
         setErro("Erro ao carregar as mesas disponíveis.");
       }
@@ -116,12 +108,13 @@ export default function ReservaPage() {
       if (response) {
         const data: ResponseSignin = await response.json();
         const { erro, mensagem, token = '' } = data;
-
         if (erro) {
           setErro(mensagem);
         } else {
-          router.push('/');
+           setCookie(undefined, 'authorization', token, {
+                      maxAge: 60*60*1} )
         }
+        router.push('/');
       } else {
         setErro("Erro ao tentar realizar a reserva. Tente novamente.");
       }
@@ -136,7 +129,7 @@ export default function ReservaPage() {
       <form className={styles.form} onSubmit={handleSubmit}>
         <div className={styles.email}>
           <h1 className={styles.titulo}>Faça a Sua Reserva de Mesa:</h1>
-
+          
           <label htmlFor="n_mesa">Selecione o número da mesa:</label>
           <select
             className={styles.input}

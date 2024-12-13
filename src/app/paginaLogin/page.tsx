@@ -20,7 +20,7 @@ export default function Login() {
   const router = useRouter();
 
   useEffect(() => {
-    const { 'restaurant-token': token } = parseCookies();
+    const { 'authorization': token } = parseCookies();
     if (token) {
       router.push('/');
     }
@@ -44,7 +44,7 @@ export default function Login() {
           setError(mensagem)
         } else {
           // npm i nookies setCookie
-          setCookie(undefined, 'restaurant-token', token, {
+          setCookie(undefined, 'authorization', token, {
             maxAge: 60*60*1 // 1 hora
           } )
 
