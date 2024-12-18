@@ -112,7 +112,7 @@ export default function ReservaPage() {
           setErro(mensagem);
         } else {
            setCookie(undefined, 'authorization', token, {
-                      maxAge: 60*60*1} )
+                      maxAge: 60*60*1})
         }
         router.push('/');
       } else {
@@ -140,10 +140,11 @@ export default function ReservaPage() {
           >
             <option value="">Selecione uma mesa</option>
             {mesas.map((mesa) => (
-              <option key={mesa.id} value={mesa.n_mesa}>
-                Mesa {mesa.n_mesa} - Lugares: {mesa.n_pessoas} - Tipo: {mesa.tipo}
-              </option>
-            ))}
+  <option key={mesa.id} value={mesa.n_mesa}>
+    Mesa {mesa.n_mesa} - Lugares: {mesa.n_pessoas} - Tipo: {mesa.tipo}
+  </option>
+))}
+
           </select>
         </div>
 

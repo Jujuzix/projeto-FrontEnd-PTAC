@@ -17,7 +17,9 @@ export default function MesaPage() {
   const [mesa, setMesa] = useState<Mesa>({
     id: 0,
     n_mesa: 0,
-    n_pessoas: 0, 
+    n_pessoas: 0,
+    n_lugares: 0,
+    tipo: '',
   });
 
   const [erro, setErro] = useState<string>("");
