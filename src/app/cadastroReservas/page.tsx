@@ -32,14 +32,23 @@ export default function ReservaPage() {
   const [erro, setErro] = useState<string>("");
   const router = useRouter();
 
-  // Função para carregar as mesas disponíveis
+
   const carregarMesas = async () => {
     try {
+   
+        const { 'authorization': token } = parseCookies();
+    
       setErro(""); // Resetar erro antes de carregar
-      const response = await fetch(`${ApiURL}/mesas/`);
+      const response = await fetch(`${ApiURL}/mesas/`, {
+        method: "GET",
+        headers:{
+          "Authorization": token
+        }
+      });
+      console.log(response)
       if (response) {
         const data = await response.json();
-        setMesas(data.mesas); // Certifique-se que 'mesas' é a chave correta na resposta
+        setMesas(data.mesas);
         console.log(data)
       } else {
         setErro("Erro ao carregar as mesas disponíveis.");
@@ -49,7 +58,6 @@ export default function ReservaPage() {
       setErro("Erro de rede ao carregar as mesas.");
     }
   };
-
   useEffect(() => {
     carregarMesas();
   }, []);
@@ -107,13 +115,10 @@ export default function ReservaPage() {
 
       if (response) {
         const data: ResponseSignin = await response.json();
-        const { erro, mensagem, token = '' } = data;
+        const { erro, mensagem = '' } = data;
         if (erro) {
           setErro(mensagem);
-        } else {
-           setCookie(undefined, 'authorization', token, {
-                      maxAge: 60*60*1})
-        }
+        } else {}
         router.push('/');
       } else {
         setErro("Erro ao tentar realizar a reserva. Tente novamente.");
@@ -144,7 +149,6 @@ export default function ReservaPage() {
     Mesa {mesa.n_mesa} - Lugares: {mesa.n_pessoas} - Tipo: {mesa.tipo}
   </option>
 ))}
-
           </select>
         </div>
 
