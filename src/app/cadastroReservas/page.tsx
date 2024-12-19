@@ -36,7 +36,7 @@ export default function ReservaPage() {
   const carregarMesas = async () => {
     try {
    
-        const { 'authorization': token } = parseCookies();
+      const { 'authorization': token } = parseCookies();
     
       setErro(""); // Resetar erro antes de carregar
       const response = await fetch(`${ApiURL}/mesas/`, {
@@ -101,16 +101,14 @@ export default function ReservaPage() {
     e.preventDefault();
     try {
       setErro(""); // Resetar erro antes de enviar
+      const { 'authorization': token } = parseCookies();
       const response = await fetch(`${ApiURL}/mesas/reservar`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          "Authorization": token
         },
-        body: JSON.stringify({
-          n_mesa: reserva.n_mesa,
-          data_reserva: reserva.data_reserva,
-          n_pessoas: reserva.n_pessoas
-        })
+        body: JSON.stringify(reserva)
       });
 
       if (response) {

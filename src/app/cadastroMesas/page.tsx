@@ -6,6 +6,7 @@ import styles from "../styles/cadastro.module.css";
 import Botao from "../components/Botao";
 import { ApiURL } from '../../../config';
 import Mesa from "../interfaces/mesa";
+import { parseCookies } from "nookies";
 
 interface ResponseSignin {
   erro: boolean;
@@ -50,10 +51,13 @@ export default function MesaPage() {
     e.preventDefault();
     setCarregando(true); 
     try {
+      const { 'authorization': token } = parseCookies();
+
       const response = await fetch(`${ApiURL}/mesas/cadastrar`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': token
         },
         body: JSON.stringify({
           n_mesa: mesa.n_mesa,
