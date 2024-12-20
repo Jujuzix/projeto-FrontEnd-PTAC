@@ -66,23 +66,23 @@ export default function MesaPage() {
         }),
       });
 
-      if (response) {  // Verificando se a resposta foi ok
+      if (response) { 
         const data: ResponseSignin = await response.json();
         const { erro, mensagem } = data;
 
         if (erro) {
-          setErro(mensagem); // Exibe mensagem de erro do backend
+          setErro(mensagem); 
         } else {
-          router.push('/'); // Redireciona para a página inicial após o cadastro
+          router.push('/'); 
         }
       } else {
-        setErro("Erro ao tentar cadastrar. Tente novamente."); // Mensagem de erro geral
+        setErro("Erro ao tentar cadastrar. Tente novamente."); 
       }
     } catch (error) {
       console.error('Erro na requisição', error);
-      setErro("Erro de rede ou servidor. Tente novamente."); // Mensagem de erro de rede
+      setErro("Erro de rede ou servidor. Tente novamente."); 
     } finally {
-      setCarregando(false);  // Finaliza o carregamento
+      setCarregando(false);  
     }
   };
 
@@ -113,7 +113,7 @@ export default function MesaPage() {
           />
         </div>
 
-        {erro && <p className={styles.msgErro}>{erro}</p>} {/* Exibe a mensagem de erro */}
+        {erro && <p className={styles.msgErro}>{erro}</p>} 
 
         <button type="submit" className={styles.botaoSubmit} disabled={carregando}>
           {carregando ? 'Cadastrando...' : 'Efetuar o seu cadastro de mesa'}

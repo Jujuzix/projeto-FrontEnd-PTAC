@@ -6,7 +6,7 @@ import styles from "../styles/cadastro.module.css";
 import Botao from "../components/Botao";
 import Reserva from "../interfaces/reserva";
 import { ApiURL } from '../../../config';
-import { setCookie, parseCookies } from 'nookies';
+import { parseCookies } from 'nookies';
 
 interface ResponseSignin {
   erro: boolean;
@@ -19,6 +19,7 @@ interface Mesa {
   n_mesa: number;
   n_pessoas: number;
   tipo: string;
+  data_reserva?: string;  // Certifique-se de que a data da reserva esteja presente
 }
 
 export default function ReservaPage() {
@@ -32,24 +33,22 @@ export default function ReservaPage() {
   const [erro, setErro] = useState<string>("");
   const router = useRouter();
 
-
+  // Carrega as mesas disponíveis
   const carregarMesas = async () => {
     try {
-   
       const { 'authorization': token } = parseCookies();
-    
-      setErro(""); // Resetar erro antes de carregar
+
+      setErro("");
       const response = await fetch(`${ApiURL}/mesas/`, {
         method: "GET",
-        headers:{
+        headers: {
           "Authorization": token
         }
       });
-      console.log(response)
-      if (response) {
+
+      if (response.ok) {
         const data = await response.json();
         setMesas(data.mesas);
-        console.log(data)
       } else {
         setErro("Erro ao carregar as mesas disponíveis.");
       }
@@ -58,23 +57,20 @@ export default function ReservaPage() {
       setErro("Erro de rede ao carregar as mesas.");
     }
   };
+
   useEffect(() => {
     carregarMesas();
   }, []);
 
-  // Função para alterar a mesa selecionada
-  const alterarNmesa = (novoNmesa: string) => {
-    const mesaSelecionada = mesas.find((mesa) => mesa.n_mesa === parseInt(novoNmesa, 10));
-    if (mesaSelecionada) {
-      setReserva((valoresAnteriores) => ({
-        ...valoresAnteriores,
-        n_mesa: mesaSelecionada.n_mesa,
-        n_pessoas: mesaSelecionada.n_pessoas
-      }));
-    }
+  // Alterar o número da mesa selecionada
+  const selecionarMesa = (mesaId: number) => {
+    setReserva((prevReserva) => ({
+      ...prevReserva,
+      n_mesa: mesaId
+    }));
   };
 
-  // Função para alterar a data da reserva
+  // Alterar a data da reserva
   const alterarData = (novaData: string) => {
     setReserva((valoresAnteriores) => ({
       ...valoresAnteriores,
@@ -82,25 +78,16 @@ export default function ReservaPage() {
     }));
   };
 
-  // Função para alterar o número de pessoas
-  const alterarPessoas = (novaQuantPessoas: string) => {
-    const newValue = parseInt(novaQuantPessoas, 10);
-    if (!isNaN(newValue) && newValue >= 1 && newValue <= 50) {
-      setErro(""); // Resetar erro caso o valor seja válido
-      setReserva((valoresAnteriores) => ({
-        ...valoresAnteriores,
-        n_pessoas: newValue
-      }));
-    } else {
-      setErro("A quantidade de pessoas deve ser entre 1 e 50!");
-    }
-  };
-
-  // Função de envio do formulário de reserva
+  // Enviar a reserva
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      setErro(""); // Resetar erro antes de enviar
+      if (!reserva.n_mesa || !reserva.data_reserva) {
+        setErro("Por favor, selecione uma mesa e uma data.");
+        return;
+      }
+
+      setErro("");
       const { 'authorization': token } = parseCookies();
       const response = await fetch(`${ApiURL}/mesas/reservar`, {
         method: 'POST',
@@ -111,13 +98,14 @@ export default function ReservaPage() {
         body: JSON.stringify(reserva)
       });
 
-      if (response) {
+      if (response.ok) {
         const data: ResponseSignin = await response.json();
         const { erro, mensagem = '' } = data;
         if (erro) {
           setErro(mensagem);
-        } else {}
-        router.push('/');
+        } else {
+          router.push('/');
+        }
       } else {
         setErro("Erro ao tentar realizar a reserva. Tente novamente.");
       }
@@ -132,48 +120,41 @@ export default function ReservaPage() {
       <form className={styles.form} onSubmit={handleSubmit}>
         <div className={styles.email}>
           <h1 className={styles.titulo}>Faça a Sua Reserva de Mesa:</h1>
-          
-          <label htmlFor="n_mesa">Selecione o número da mesa:</label>
-          <select
-            className={styles.input}
-            id="n_mesa"
-            value={reserva.n_mesa}
-            onChange={(e) => alterarNmesa(e.target.value)}
-            required
-          >
-            <option value="">Selecione uma mesa</option>
-            {mesas.map((mesa) => (
-  <option key={mesa.id} value={mesa.n_mesa}>
-    Mesa {mesa.n_mesa} - Lugares: {mesa.n_pessoas} - Tipo: {mesa.tipo}
-  </option>
-))}
-          </select>
-        </div>
 
-        <div className={styles.email}>
-          <label htmlFor="data">Escolha a data para a reserva:</label>
-          <input
-            className={styles.input}
-            type="date"
-            id="data"
-            value={reserva.data_reserva}
-            onChange={(e) => alterarData(e.target.value)}
-            required
-          />
-        </div>
+          <div className={styles.email}>
+            <label htmlFor="data">Escolha a data para a reserva:</label>
+            <input
+              className={styles.input}
+              type="date"
+              id="data"
+              value={reserva.data_reserva}
+              onChange={(e) => alterarData(e.target.value)}
+              required
+            />
+          </div>
 
-        <div className={styles.senha}>
-          <label htmlFor="n_pessoas">Quantidade de pessoas:</label>
-          <input
-            className={styles.input}
-            type="number"
-            id="n_pessoas"
-            min="1"
-            max="50"
-            value={reserva.n_pessoas}
-            onChange={(e) => alterarPessoas(e.target.value)}
-            required
-          />
+          <label htmlFor="n_mesa">Selecione uma mesa:</label>
+          <div className="">
+            {mesas.map((table) => {
+              const mesaReservada = mesas.find(
+                (reserva) => reserva.data_reserva === reserva.data_reserva && reserva.n_mesa === table.n_mesa
+              );
+              const isDisabled = mesaReservada !== undefined;
+
+              return (
+                <button
+                  key={table.id}
+                  className={`p-4 text-white ${isDisabled ? 'bg-red-500' : 'bg-indigo-500'} rounded-lg hover:bg-indigo-600 focus:outline-none focus:bg-indigo-700`}
+                  onClick={() => selecionarMesa(table.n_mesa)}
+                  disabled={isDisabled}
+                >
+                  <h1>Mesa: {table.n_mesa}</h1>
+                  <h2>Numero de pessoas: {table.n_pessoas}</h2>
+                  {isDisabled && <p>Reservada</p>}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {erro && <p className={styles.msgErro}>{erro}</p>}

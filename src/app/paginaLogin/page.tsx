@@ -26,40 +26,37 @@ export default function Login() {
     }
   }, [router]);
 
-  const  handleSubmit = async (e : FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
-     const response = await fetch(`${ApiURL}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type' : 'application/json'
-      },
-      body: JSON.stringify({email, password})
-     })
-     console.log(response)
-      if (response){
-        const data : ResponseSignin = await response.json()
-        const {erro, mensagem, token = ''} = data;
+      const response = await fetch(`${ApiURL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      })
+      console.log(response)
+      if (response) {
+        const data: ResponseSignin = await response.json()
+        const { erro, mensagem, token = '' } = data;
         console.log(data)
-        if (erro){
+        if (erro) {
           setError(mensagem)
         } else {
-          // npm i nookies setCookie
           setCookie(undefined, 'authorization', token, {
-            maxAge: 60*60*1 // 1 hora
-          } )
-
+            maxAge: 60 * 60 * 1
+          })
           router.push('/')
-
         }
       } else {
 
       }
-  } 
+    }
     catch (error) {
-    console.error('Erro na requisicao', error)
+      console.error('Erro na requisicao', error)
+    }
   }
-}
 
 
   return (
