@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/cadastro.module.css";
 import Botao from "../components/Botao";
@@ -19,7 +19,7 @@ interface Mesa {
   n_mesa: number;
   n_pessoas: number;
   tipo: string;
-  data_reserva?: string;  // Certifique-se de que a data da reserva esteja presente
+  data_reserva?: string;
 }
 
 export default function ReservaPage() {
@@ -29,15 +29,27 @@ export default function ReservaPage() {
     n_pessoas: 0
   });
 
+  function filtroData() {
+    const dataSelecionada = new Date()
+    return dataSelecionada.toISOString().split("T")[0]
+  }
+
   const [mesas, setMesas] = useState<Mesa[]>([]);
   const [erro, setErro] = useState<string>("");
+  const [dateTables, setDateTables] = useState(filtroData);
   const router = useRouter();
+
+  // Função para atualizar a data da reserva no estado
+  function handleChangeDate(e: ChangeEvent<HTMLInputElement>) {
+    const novaData = e.target.value;
+    setDateTables(novaData);
+    alterarData(novaData);
+  }
 
   // Carrega as mesas disponíveis
   const carregarMesas = async () => {
     try {
       const { 'authorization': token } = parseCookies();
-
       setErro("");
       const response = await fetch(`${ApiURL}/mesas/`, {
         method: "GET",
@@ -64,10 +76,18 @@ export default function ReservaPage() {
 
   // Alterar o número da mesa selecionada
   const selecionarMesa = (mesaId: number) => {
-    setReserva((prevReserva) => ({
-      ...prevReserva,
-      n_mesa: mesaId
-    }));
+    const mesaReservada = mesas.find(
+      (mesa) => mesa.n_mesa === mesaId && mesa.data_reserva === dateTables
+    );
+
+    if (!mesaReservada) {
+      setReserva((prevReserva) => ({
+        ...prevReserva,
+        n_mesa: mesaId
+      }));
+    } else {
+      setErro("Esta mesa já está reservada para essa data.");
+    }
   };
 
   // Alterar a data da reserva
@@ -81,13 +101,21 @@ export default function ReservaPage() {
   // Enviar a reserva
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    try {
-      if (!reserva.n_mesa || !reserva.data_reserva) {
-        setErro("Por favor, selecione uma mesa e uma data.");
-        return;
-      }
+    
+    // Validação de dados
+    if (!reserva.n_mesa || !reserva.data_reserva) {
+      setErro("Por favor, selecione uma mesa e uma data.");
+      return;
+    }
 
-      setErro("");
+    // Validar se a data é no futuro
+    if (new Date(reserva.data_reserva) < new Date(filtroData())) {
+      setErro("A data selecionada não pode ser no passado.");
+      return;
+    }
+
+    setErro("");
+    try {
       const { 'authorization': token } = parseCookies();
       const response = await fetch(`${ApiURL}/mesas/reservar`, {
         method: 'POST',
@@ -104,7 +132,7 @@ export default function ReservaPage() {
         if (erro) {
           setErro(mensagem);
         } else {
-          router.push('/');
+          router.push('/'); // Redirecionar para a página inicial
         }
       } else {
         setErro("Erro ao tentar realizar a reserva. Tente novamente.");
@@ -127,8 +155,9 @@ export default function ReservaPage() {
               className={styles.input}
               type="date"
               id="data"
-              value={reserva.data_reserva}
-              onChange={(e) => alterarData(e.target.value)}
+              value={dateTables}
+              min={filtroData()}
+              onChange={handleChangeDate}
               required
             />
           </div>
@@ -137,14 +166,13 @@ export default function ReservaPage() {
           <div className="">
             {mesas.map((table) => {
               const mesaReservada = mesas.find(
-                (reserva) => reserva.data_reserva === reserva.data_reserva && reserva.n_mesa === table.n_mesa
+                (tableReserva) => tableReserva.data_reserva === dateTables && tableReserva.n_mesa === table.n_mesa
               );
               const isDisabled = mesaReservada !== undefined;
 
               return (
                 <button
                   key={table.id}
-                  className={`p-4 text-white ${isDisabled ? 'bg-red-500' : 'bg-indigo-500'} rounded-lg hover:bg-indigo-600 focus:outline-none focus:bg-indigo-700`}
                   onClick={() => selecionarMesa(table.n_mesa)}
                   disabled={isDisabled}
                 >
@@ -155,6 +183,25 @@ export default function ReservaPage() {
               );
             })}
           </div>
+        </div>
+
+        <div >
+          {reserva.n_mesa ? (
+            <div>
+              <h2 >Reservar Mesa {reserva.n_mesa}</h2>
+              <label>
+                Data:
+                <input
+                  type="date"
+                  value={reserva.data_reserva}
+                  min={filtroData()}
+                  onChange={(e) => alterarData(e.target.value)}
+                />
+              </label>
+            </div>
+          ) : (
+            <p>Selecione uma mesa para reservar</p>
+          )}
         </div>
 
         {erro && <p className={styles.msgErro}>{erro}</p>}
