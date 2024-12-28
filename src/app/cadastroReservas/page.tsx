@@ -30,8 +30,8 @@ export default function ReservaPage() {
   });
 
   function filtroData() {
-    const dataSelecionada = new Date()
-    return dataSelecionada.toISOString().split("T")[0]
+    const dataSelecionada = new Date();
+    return dataSelecionada.toISOString().split("T")[0];
   }
 
   const [mesas, setMesas] = useState<Mesa[]>([]);
@@ -39,14 +39,12 @@ export default function ReservaPage() {
   const [dateTables, setDateTables] = useState(filtroData);
   const router = useRouter();
 
-  // Função para atualizar a data da reserva no estado
   function handleChangeDate(e: ChangeEvent<HTMLInputElement>) {
     const novaData = e.target.value;
     setDateTables(novaData);
     alterarData(novaData);
   }
 
-  // Carrega as mesas disponíveis
   const carregarMesas = async () => {
     try {
       const { 'authorization': token } = parseCookies();
@@ -74,23 +72,23 @@ export default function ReservaPage() {
     carregarMesas();
   }, []);
 
-  // Alterar o número da mesa selecionada
   const selecionarMesa = (mesaId: number) => {
     const mesaReservada = mesas.find(
       (mesa) => mesa.n_mesa === mesaId && mesa.data_reserva === dateTables
     );
 
     if (!mesaReservada) {
+      const mesaSelecionada = mesas.find((mesa) => mesa.n_mesa === mesaId);
       setReserva((prevReserva) => ({
         ...prevReserva,
-        n_mesa: mesaId
+        n_mesa: mesaId,
+        n_pessoas: mesaSelecionada?.n_pessoas || 0,
       }));
     } else {
       setErro("Esta mesa já está reservada para essa data.");
     }
   };
 
-  // Alterar a data da reserva
   const alterarData = (novaData: string) => {
     setReserva((valoresAnteriores) => ({
       ...valoresAnteriores,
@@ -98,17 +96,14 @@ export default function ReservaPage() {
     }));
   };
 
-  // Enviar a reserva
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    
-    // Validação de dados
+
     if (!reserva.n_mesa || !reserva.data_reserva) {
       setErro("Por favor, selecione uma mesa e uma data.");
       return;
     }
 
-    // Validar se a data é no futuro
     if (new Date(reserva.data_reserva) < new Date(filtroData())) {
       setErro("A data selecionada não pode ser no passado.");
       return;
@@ -132,7 +127,7 @@ export default function ReservaPage() {
         if (erro) {
           setErro(mensagem);
         } else {
-          router.push('/'); // Redirecionar para a página inicial
+          router.push('/');
         }
       } else {
         setErro("Erro ao tentar realizar a reserva. Tente novamente.");
@@ -165,30 +160,27 @@ export default function ReservaPage() {
           <label htmlFor="n_mesa">Selecione uma mesa:</label>
           <div className="">
             {mesas.map((table) => {
-              const mesaReservada = mesas.find(
-                (tableReserva) => tableReserva.data_reserva === dateTables && tableReserva.n_mesa === table.n_mesa
-              );
-              const isDisabled = mesaReservada !== undefined;
-
+              const isReserved = table.data_reserva === dateTables;
               return (
                 <button
                   key={table.id}
                   onClick={() => selecionarMesa(table.n_mesa)}
-                  disabled={isDisabled}
+                  disabled={isReserved}
                 >
                   <h1>Mesa: {table.n_mesa}</h1>
-                  <h2>Numero de pessoas: {table.n_pessoas}</h2>
-                  {isDisabled && <p>Reservada</p>}
+                  <h2>Capacidade: {table.n_pessoas} pessoas</h2>
+                  {isReserved && <p>Reservada</p>}
                 </button>
               );
             })}
           </div>
         </div>
 
-        <div >
+        <div>
           {reserva.n_mesa ? (
             <div>
-              <h2 >Reservar Mesa {reserva.n_mesa}</h2>
+              <h2>Reservar Mesa {reserva.n_mesa}</h2>
+              <h2>Capacidade para {reserva.n_pessoas} pessoas</h2>
               <label>
                 Data:
                 <input
