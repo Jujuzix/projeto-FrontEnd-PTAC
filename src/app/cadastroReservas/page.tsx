@@ -25,7 +25,7 @@ interface Mesa {
 export default function ReservaPage() {
   const [reserva, setReserva] = useState<Reserva>({
     n_mesa: 0,
-    data_reserva: "",
+    data_reserva: filtroData(),
     n_pessoas: 0
   });
 
@@ -39,12 +39,6 @@ export default function ReservaPage() {
   const [dateTables, setDateTables] = useState(filtroData);
   const router = useRouter();
 
-  function handleChangeDate(e: ChangeEvent<HTMLInputElement>) {
-    const novaData = e.target.value;
-    setDateTables(novaData);
-    alterarData(novaData);
-  }
-
   const carregarMesas = async () => {
     try {
       const { 'authorization': token } = parseCookies();
@@ -56,7 +50,7 @@ export default function ReservaPage() {
         }
       });
 
-      if (response.ok) {
+      if (response) {
         const data = await response.json();
         setMesas(data.mesas);
       } else {
@@ -94,7 +88,14 @@ export default function ReservaPage() {
       ...valoresAnteriores,
       data_reserva: novaData
     }));
+    console.log(reserva)
   };
+
+  function handleChangeDate(e: ChangeEvent<HTMLInputElement>) {
+    const novaData = e.target.value;
+    setDateTables(novaData);
+    alterarData(novaData);
+  }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -121,7 +122,7 @@ export default function ReservaPage() {
         body: JSON.stringify(reserva)
       });
 
-      if (response.ok) {
+      if (response) {
         const data: ResponseSignin = await response.json();
         const { erro, mensagem = '' } = data;
         if (erro) {
@@ -181,15 +182,6 @@ export default function ReservaPage() {
             <div>
               <h2>Reservar Mesa {reserva.n_mesa}</h2>
               <h2>Capacidade para {reserva.n_pessoas} pessoas</h2>
-              <label>
-                Data:
-                <input
-                  type="date"
-                  value={reserva.data_reserva}
-                  min={filtroData()}
-                  onChange={(e) => alterarData(e.target.value)}
-                />
-              </label>
             </div>
           ) : (
             <p>Selecione uma mesa para reservar</p>
