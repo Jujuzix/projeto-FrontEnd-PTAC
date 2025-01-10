@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../styles/cadastro.module.css";
 import Botao from "../components/Botao";
 import Reserva from "../interfaces/reserva";
-import { ApiURL } from '../../../config';
-import { parseCookies } from 'nookies';
+import { ApiURL } from "../../../config";
+import { parseCookies } from "nookies";
 
 interface ResponseSignin {
   erro: boolean;
@@ -26,7 +26,8 @@ export default function ReservaPage() {
   const [reserva, setReserva] = useState<Reserva>({
     n_mesa: 0,
     data_reserva: filtroData(),
-    n_pessoas: 0
+    n_pessoas: 0, 
+    n_pessoas_sentando: 0, 
   });
 
   function filtroData() {
@@ -41,13 +42,13 @@ export default function ReservaPage() {
 
   const carregarMesas = async () => {
     try {
-      const { 'authorization': token } = parseCookies();
+      const { authorization: token } = parseCookies();
       setErro("");
       const response = await fetch(`${ApiURL}/mesas/`, {
         method: "GET",
         headers: {
-          "Authorization": token
-        }
+          Authorization: token,
+        },
       });
 
       if (response) {
@@ -57,7 +58,7 @@ export default function ReservaPage() {
         setErro("Erro ao carregar as mesas disponíveis.");
       }
     } catch (error) {
-      console.error('Erro na requisição', error);
+      console.error("Erro na requisição", error);
       setErro("Erro de rede ao carregar as mesas.");
     }
   };
@@ -77,6 +78,7 @@ export default function ReservaPage() {
         ...prevReserva,
         n_mesa: mesaId,
         n_pessoas: mesaSelecionada?.n_pessoas || 0,
+        n_pessoas_sentando: 0, 
       }));
     } else {
       setErro("Esta mesa já está reservada para essa data.");
@@ -86,9 +88,9 @@ export default function ReservaPage() {
   const alterarData = (novaData: string) => {
     setReserva((valoresAnteriores) => ({
       ...valoresAnteriores,
-      data_reserva: novaData
+      data_reserva: novaData,
     }));
-    console.log(reserva)
+    console.log('Reserva após alteração de data:', reserva); // Log dos dados após alteração de data
   };
 
   function handleChangeDate(e: ChangeEvent<HTMLInputElement>) {
@@ -100,8 +102,11 @@ export default function ReservaPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (!reserva.n_mesa || !reserva.data_reserva) {
-      setErro("Por favor, selecione uma mesa e uma data.");
+    // Verificando os dados antes de enviar
+    console.log('Dados de reserva antes de enviar:', reserva);
+
+    if (!reserva.n_mesa || !reserva.data_reserva || !reserva.n_pessoas_sentando) {
+      setErro("Por favor, selecione uma mesa, uma data e informe a quantidade de pessoas.");
       return;
     }
 
@@ -110,31 +115,36 @@ export default function ReservaPage() {
       return;
     }
 
+    if (!reserva.n_pessoas_sentando || reserva.n_pessoas_sentando > reserva.n_pessoas) {
+      setErro("Por favor, informe uma quantidade válida de pessoas que vão sentar.");
+      return;
+    }
+
     setErro("");
     try {
-      const { 'authorization': token } = parseCookies();
+      const { authorization: token } = parseCookies();
       const response = await fetch(`${ApiURL}/mesas/reservar`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          "Authorization": token
+          "Content-Type": "application/json",
+          Authorization: token,
         },
-        body: JSON.stringify(reserva)
+        body: JSON.stringify(reserva),
       });
 
-      if (response) {
+      if (response.ok) {
         const data: ResponseSignin = await response.json();
-        const { erro, mensagem = '' } = data;
+        const { erro, mensagem = "" } = data;
         if (erro) {
           setErro(mensagem);
         } else {
-          router.push('/');
+          router.push("/");
         }
       } else {
         setErro("Erro ao tentar realizar a reserva. Tente novamente.");
       }
     } catch (error) {
-      console.error('Erro na requisição', error);
+      console.error("Erro na requisição", error);
       setErro("Erro de rede ou servidor. Tente novamente.");
     }
   };
@@ -182,6 +192,25 @@ export default function ReservaPage() {
             <div>
               <h2>Reservar Mesa {reserva.n_mesa}</h2>
               <h2>Capacidade para {reserva.n_pessoas} pessoas</h2>
+              <label>
+                Quantidade de pessoas que vão sentar:
+                <input
+                  type="number"
+                  min={1}
+                  max={reserva.n_pessoas}
+                  value={reserva.n_pessoas_sentando || 0}
+                  onChange={(e) => {
+                    const quantidade = Math.min(
+                      Math.max(1, Number(e.target.value)),
+                      reserva.n_pessoas
+                    );
+                    setReserva((prev) => ({
+                      ...prev,
+                      n_pessoas_sentando: quantidade,
+                    }));
+                  }}
+                />
+              </label>
             </div>
           ) : (
             <p>Selecione uma mesa para reservar</p>
@@ -190,8 +219,13 @@ export default function ReservaPage() {
 
         {erro && <p className={styles.msgErro}>{erro}</p>}
 
-        <button type="submit" className={styles.botaoSubmit}>Confirmar Reserva</button>
-        <Botao titulo="Ir para a Página de Login" botao={() => router.push('/paginaLogin')} />
+        <button type="submit" className={styles.botaoSubmit}>
+          Confirmar Reserva
+        </button>
+        <Botao
+          titulo="Ir para a Página de Login"
+          botao={() => router.push("/paginaLogin")}
+        />
       </form>
     </div>
   );
