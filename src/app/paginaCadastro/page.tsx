@@ -1,14 +1,15 @@
 'use client';
 
+//importações utilizadas
+import { FormEvent, useState, useEffect } from "react"; //hooks para eventos e estado
+import { useRouter } from "next/navigation"; //hook para navegação de rotas
+import styles from "../styles/cadastro.module.css"; //estilização página
+import Botao from "../components/Botao"; //componente para personalização de botão
+import Usuario from "../interfaces/usuario";// importação da interface para a estruturação de "usuario"
+import { ApiURL } from '../../../config'; // URL da api definida em um arquivo para configurações
+import { setCookie, parseCookies } from 'nookies';//biblioteca para acesso ao cookies, utilizada para fazer autenticação
 
-import { FormEvent, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import styles from "../styles/cadastro.module.css";
-import Botao from "../components/Botao";
-import Usuario from "../interfaces/usuario";
-import { ApiURL } from '../../../config';
-import { setCookie, parseCookies } from 'nookies';
-
+//interface de definição do formato de resposta que API deve trazer
 interface ResponseSignin {
   erro: boolean,
   mensagem: string,
@@ -16,14 +17,17 @@ interface ResponseSignin {
 }
 
 export default function Cadastro() {
+
+  //estado para armazenamento de dados 
   const [usuario, setUsuario] = useState<Usuario>({
     nome: '',
     email: '',
     password: '',
   });
   const [erro, setError] = useState("");
-  const router = useRouter();
+  const router = useRouter(); //hook de navegação
 
+  
   const alterarNome = (novoNome: string) => {
     setUsuario((valoresAnteriores) => ({
       ...valoresAnteriores,
