@@ -1,13 +1,22 @@
 'use client';
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import styles from "./styles/page.module.css";
-import Botao from "./components/Botao";
+//importações para funcionamento de componentes
+import { useState } from "react"; //hook para gerenciamento de estado
+import { useRouter } from "next/navigation"; //hook para rota Next.js
+import styles from "./styles/page.module.css"; //estilização para página
+import Botao from "./components/Botao"; //componente para personalização de botão
 
+//componente de página principal
 export default function Home() {
+
+  //user (estado atual)
+  //setUser (função utilizada para atualizar este estado)
   const [user, setUser] = useState(true);
+
+  //variável para utilização de hook de rotas
   const route = useRouter();
 
+  // somente será renderizado conteúdo se o user será true
+  //caso o user seja false, não terá renderização
   if (user) {
     return (
       <div className={styles.page}>
