@@ -1,19 +1,22 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import styles from "../styles/cadastro.module.css";
-import Botao from "../components/Botao";
-import Reserva from "../interfaces/reserva";
-import { ApiURL } from "../../../config";
-import { parseCookies } from "nookies";
+//importações utilizadas
+import { ChangeEvent, FormEvent, useEffect, useState } from "react"; //hooks de eventos e gerenciamento de estado
+import { useRouter } from "next/navigation"; //hook para navegação de rotas
+import styles from "../styles/cadastro.module.css"; //estilização da página
+import Botao from "../components/Botao"; //componente para personalização de botão
+import Reserva from "../interfaces/reserva"; //importação da interface para a estruturação de "reserva"
+import { ApiURL } from "../../../config";// URL da api definida em um arquivo para configurações
+import { parseCookies } from "nookies"; //biblioteca para acesso ao cookies, utilizada para fazer autenticação
 
+//interface de definição do formato de resposta que API deve trazer
 interface ResponseSignin {
   erro: boolean;
   mensagem: string;
   token?: string;
 }
 
+//interface de definição para formato de mesa
 interface Mesa {
   id: number;
   n_mesa: number;
@@ -22,7 +25,10 @@ interface Mesa {
   data_reserva?: string;
 }
 
+//componente página de cadastro de mesas
 export default function ReservaPage() {
+
+  //estado inicial para armazenamento de dados da reserva adicionada
   const [reserva, setReserva] = useState<Reserva>({
     n_mesa: 0,
     data_reserva: filtroData(),
@@ -30,32 +36,34 @@ export default function ReservaPage() {
     n_pessoas_sentando: 0, 
   });
 
+  //função para obter data atual no formato (YYY-MM-DD)
   function filtroData() {
     const dataSelecionada = new Date();
     return dataSelecionada.toISOString().split("T")[0];
   }
 
-  const [mesas, setMesas] = useState<Mesa[]>([]);
-  const [erro, setErro] = useState<string>("");
-  const [dateTables, setDateTables] = useState(filtroData);
-  const router = useRouter();
+  const [mesas, setMesas] = useState<Mesa[]>([]); //estado de armazenamento para lista de mesas disponíveis
+  const [erro, setErro] = useState<string>(""); //estado para armazenamento de mensagens de erro
+  const [dateTables, setDateTables] = useState(filtroData); //estado para gerenciar datas de reservas
+  const router = useRouter(); // hook de rotas
 
+  //função para carregamento de mesas disponíveis pela API
   const carregarMesas = async () => {
     try {
-      const { authorization: token } = parseCookies();
+      const { authorization: token } = parseCookies(); //token de autenticação dos cookies
       setErro("");
       const response = await fetch(`${ApiURL}/mesas/`, {
-        method: "GET",
+        method: "GET", // método HTTP GET para obter mesas
         headers: {
-          Authorization: token,
+          Authorization: token, //passa token ao cabeçalho
         },
       });
 
       if (response) {
-        const data = await response.json();
-        setMesas(data.mesas);
+        const data = await response.json(); //converção de resposta em JSON
+        setMesas(data.mesas); //atualização de lista de mesas
       } else {
-        setErro("Erro ao carregar as mesas disponíveis.");
+        setErro("Erro ao carregar as mesas disponíveis."); //mensagem e erro
       }
     } catch (error) {
       console.error("Erro na requisição", error);
@@ -63,46 +71,57 @@ export default function ReservaPage() {
     }
   };
 
+  //hook para carregamento de mesas ao montar o componente
   useEffect(() => {
     carregarMesas();
   }, []);
 
+  //função para seleção de mesa para reserva
   const selecionarMesa = (mesaId: number) => {
+
+    // verificação de mesas reservadas para a data de escolha
     const mesaReservada = mesas.find(
       (mesa) => mesa.n_mesa === mesaId && mesa.data_reserva === dateTables
     );
 
     if (!mesaReservada) {
+
+      //encontro de mesa selecionada na lista
       const mesaSelecionada = mesas.find((mesa) => mesa.n_mesa === mesaId);
+
+      //atualização de estado da reserva com os dados da mesa selecionada
       setReserva((prevReserva) => ({
         ...prevReserva,
         n_mesa: mesaId,
         n_pessoas: mesaSelecionada?.n_pessoas || 0,
-        n_pessoas_sentando: 0, 
+        n_pessoas_sentando: 0, //reseta numero de pessoas sentada
       }));
     } else {
       setErro("Esta mesa já está reservada para essa data.");
     }
   };
 
+  // função para alteração da data de reserva
   const alterarData = (novaData: string) => {
     setReserva((valoresAnteriores) => ({
       ...valoresAnteriores,
-      data_reserva: novaData,
+      data_reserva: novaData, // atualização de data no estado da reserva
     }));
-    console.log('Reserva após alteração de data:', reserva); // Log dos dados após alteração de data
+    console.log('Reserva após alteração de data:', reserva); // Log dos dados 
   };
 
+  //função para tratamento de mudança em data 
   function handleChangeDate(e: ChangeEvent<HTMLInputElement>) {
     const novaData = e.target.value;
-    setDateTables(novaData);
-    alterarData(novaData);
+    setDateTables(novaData); // atualização de estado da data
+    alterarData(novaData); //chama função para atualizar o estado de reserva
   }
 
+  //requisição a API para cadastro de reserva
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    // Verificando os dados antes de enviar
+    // Verificando e validando os dados antes de enviar
     console.log('Dados de reserva antes de enviar:', reserva);
 
     if (!reserva.n_mesa || !reserva.data_reserva || !reserva.n_pessoas_sentando) {
@@ -124,12 +143,12 @@ export default function ReservaPage() {
     try {
       const { authorization: token } = parseCookies();
       const response = await fetch(`${ApiURL}/mesas/reservar`, {
-        method: "POST",
+        method: "POST", //metodo HTTP POST para envio de reserva
         headers: {
           "Content-Type": "application/json",
           Authorization: token,
         },
-        body: JSON.stringify(reserva),
+        body: JSON.stringify(reserva), // redirecionamento para página principal 
       });
 
       if (response.ok) {
