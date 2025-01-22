@@ -27,7 +27,7 @@ export default function Cadastro() {
   const [erro, setError] = useState("");
   const router = useRouter(); //hook de navegação
 
-  
+  //atualiza estado 'usuario' com um nome novo
   const alterarNome = (novoNome: string) => {
     setUsuario((valoresAnteriores) => ({
       ...valoresAnteriores,
@@ -35,6 +35,7 @@ export default function Cadastro() {
     }));
   };
 
+  // atualiza estado 'usuario' para novo e-mail
   const alterarEmail = (novoEmail: string) => {
     setUsuario((valoresAnteriores) => ({
       ...valoresAnteriores,
@@ -42,6 +43,7 @@ export default function Cadastro() {
     }));
   };
 
+  // atualiza estado 'usuario' para nova senha
   const alterarSenha = (novaSenha: string) => {
     setUsuario((valoresAnteriores) => ({
       ...valoresAnteriores,
@@ -49,17 +51,18 @@ export default function Cadastro() {
     }));
   };
 
-
+  //verificação de autenticação de usuario ( token existente nos cookies)
   useEffect(() => {
     const { 'authorization': token } = parseCookies();
     if (token) {
-      router.push('/');
+      router.push('/'); // redirecionamento para página principal
     }
   }, [router]);
 
   const  handleSubmit = async (e : FormEvent) => {
     e.preventDefault();
     try {
+      //faz requisição para API para cadastro de usuario
      const response = await fetch(`${ApiURL}/auth/cadastro`, {
       method: 'POST',
       headers: {
@@ -75,6 +78,7 @@ export default function Cadastro() {
           setError(mensagem)
         } else {
           // npm i nookies setCookie
+          //armazena token de autenticação em um cookie
           setCookie(undefined, 'authorization', token, {
             maxAge: 60*60*1 // 1 hora
           } )
