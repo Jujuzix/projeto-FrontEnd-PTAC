@@ -1,12 +1,14 @@
 'use client';
 
-import { FormEvent, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import styles from "../styles/login.module.css";
-import { setCookie, parseCookies } from 'nookies';
-import Botao from "../components/Botao";
-import { ApiURL } from '../../../config';
+//importações utilizadas
+import { FormEvent, useState, useEffect } from "react"; //hooks para eventos e estado
+import { useRouter } from "next/navigation"; //hook para navegação de rotas
+import styles from "../styles/login.module.css"; //estilização página
+import { setCookie, parseCookies } from 'nookies'; //biblioteca para acesso ao cookies, utilizada para fazer autenticação
+import Botao from "../components/Botao"; // importação da interface para a estruturação de "usuario"
+import { ApiURL } from '../../../config'; // URL da api definida em um arquivo para configurações
 
+//interface de definição do formato de resposta que API deve trazer
 interface ResponseSignin {
   erro: boolean,
   mensagem: string,
@@ -14,13 +16,14 @@ interface ResponseSignin {
 }
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [erro, setError] = useState("");
+  const [email, setEmail] = useState(""); //estado para armazenamento de e-mail
+  const [password, setPassword] = useState(""); //estado para armazenamento de senha
+  const [erro, setError] = useState(""); //estado para armazenamento de mensagem de erro
   const router = useRouter();
 
+  //hook que de verificação se o usuario está autenticado ao carregar componente
   useEffect(() => {
-    const { 'authorization': token } = parseCookies();
+    const { 'authorization': token } = parseCookies(); // token de autenticação armazenado ao cookies
     if (token) {
       router.push('/');
     }
@@ -29,17 +32,18 @@ export default function Login() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
+      //requisição POST para API de autenticação
       const response = await fetch(`${ApiURL}/auth/login`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json' //definição para tipo de conteudo em JSON
         },
         body: JSON.stringify({ email, password })
       })
       console.log(response)
       if (response) {
-        const data: ResponseSignin = await response.json()
-        const { erro, mensagem, token = '' } = data;
+        const data: ResponseSignin = await response.json() // conversão de resposta da API ao JSON
+        const { erro, mensagem, token = '' } = data; // desesturação de dados retornados
         console.log(data)
         if (erro) {
           setError(mensagem)
