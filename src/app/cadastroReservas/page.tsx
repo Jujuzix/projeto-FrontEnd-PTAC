@@ -30,6 +30,7 @@ export default function ReservaPage() {
 
   //estado inicial para armazenamento de dados da reserva adicionada
   const [reserva, setReserva] = useState<Reserva>({
+    id: 0,
     n_mesa: 0,
     data_reserva: filtroData(),
     n_pessoas: 0, 
@@ -187,23 +188,27 @@ export default function ReservaPage() {
             />
           </div>
 
-          <label htmlFor="n_mesa">Selecione uma mesa:</label>
           <div className="">
-            {mesas.map((table) => {
-              const isReserved = table.data_reserva === dateTables;
-              return (
-                <button
-                  key={table.id}
-                  onClick={() => selecionarMesa(table.n_mesa)}
-                  disabled={isReserved}
-                >
-                  <h1>Mesa: {table.n_mesa}</h1>
-                  <h2>Capacidade: {table.n_pessoas} pessoas</h2>
-                  {isReserved && <p>Reservada</p>}
-                </button>
-              );
-            })}
-          </div>
+  {mesas && mesas.length > 0 ? (
+    mesas.map((table) => {
+      const isReserved = table.data_reserva === dateTables;
+      return (
+        <button
+          key={table.id}
+          onClick={() => selecionarMesa(table.n_mesa)}
+          disabled={isReserved}
+        >
+          <h1>Mesa: {table.n_mesa}</h1>
+          <h2>Capacidade: {table.n_pessoas} pessoas</h2>
+          {isReserved && <p>Reservada</p>}
+        </button>
+      );
+    })
+  ) : (
+    <p>Nenhuma mesa disponível.</p>
+  )}
+</div>
+
         </div>
 
         <div>
@@ -245,6 +250,11 @@ export default function ReservaPage() {
           titulo="Ir para a Página de Login"
           botao={() => router.push("/paginaLogin")}
         />
+
+        <Botao 
+        titulo="Veja todas as reservas disponíveis"
+        botao={() => router.push("/listaReservas")}
+          />
       </form>
     </div>
   );
